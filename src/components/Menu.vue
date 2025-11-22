@@ -1,24 +1,32 @@
 <script setup>
     // import logo  from '@/assets/javascript.svg';
-    import { ref } from 'vue';
+    import { useRouter } from 'vue-router';
+    import { activeIcon, setActiveIcon } from '@/store/activeIcon'
+
+    const router = useRouter()
 
     const sidebarItems = [
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-        { src: 'javascript.svg', alt: 'иконка' },
-
+        { src: 'javascript.svg', alt: 'иконка1' },
+        { src: 'javascript.svg', alt: 'иконка2' },
+        { src: 'javascript.svg', alt: 'иконка3' },
+        { src: 'javascript.svg', alt: 'иконка4' },
+        { src: 'javascript.svg', alt: 'иконка5' },
     ];
-
-    const activeIcon = ref(2);
-    const setActive = (index) => activeIcon.value = index;
+    
+    const handleSetActive = (index) => {
+        setActiveIcon(index)
+        if (index === 0) {
+            router.push({ name: 'home' });
+        }else if (index === 1) {
+            router.push({ name: 'category' });
+        } else if (index === 2) {
+            router.push({ name: 'recip' });
+        }else if (index === 3) {
+            router.push({ name: 'eg' });
+        } else if (index === 4) {
+            router.push({ name: 'gory' });
+        }
+    };
     const goBack = () => alert('Назад!');
 
 </script>
@@ -40,9 +48,9 @@
             :key="index"
             class="menu-item"
             :class="{ 'active': activeIcon === index }"
-            @click="setActive(index)"
+            @click="handleSetActive(index)"
             >
-            <img :src="item.src" :alt="item.alt" class="icon" />
+            <img :src="item.src" :alt="item.alt" class="icon"/>
         </div>
 
         <div class="divider"></div>
@@ -95,10 +103,9 @@
     }
 
     .divider {
-        width: 24px;
+        width: 35px;
         height: 1px;
         background-color: #ddd;
-        margin: 10px 0;
     }
 
     .back-button {

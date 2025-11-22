@@ -1,7 +1,13 @@
-<script setup></script>
+<script setup>
+    const props = defineProps({
+        text: {
+            default: ''
+        },
+    });
+</script>
 
 <template>
-    <button>Добавить</button>
+    <button>{{ text }}</button>
 </template>
 
 <style scoped></style>

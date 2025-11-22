@@ -10,8 +10,9 @@
         <main class="main">
             <div class="header">
                 <div class="title">
-                    Первое
+                    <slot name="title"></slot>
                 </div>
+                <slot name="controls"></slot>
             </div>
             <div class="recipes">
                 <slot name="recipes"></slot>
@@ -42,6 +43,7 @@
     }
 
     .title {
+        font-size: 40px;
         color: green;
     }
 </style>
