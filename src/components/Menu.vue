@@ -6,77 +6,59 @@
     const router = useRouter()
 
     const sidebarItems = [
-        { src: 'javascript.svg', alt: 'иконка1' },
-        { src: 'javascript.svg', alt: 'иконка2' },
-        { src: 'javascript.svg', alt: 'иконка3' },
-        { src: 'javascript.svg', alt: 'иконка4' },
-        { src: 'javascript.svg', alt: 'иконка5' },
+        { src: '/food.svg', alt: 'Блюда' },
+        { src: '/category.svg', alt: 'Категории' },
     ];
     
     const handleSetActive = (index) => {
         setActiveIcon(index)
-        if (index === 0) {
-            router.push({ name: 'home' });
-        }else if (index === 1) {
-            router.push({ name: 'category' });
-        } else if (index === 2) {
-            router.push({ name: 'recip' });
-        }else if (index === 3) {
-            router.push({ name: 'eg' });
-        } else if (index === 4) {
-            router.push({ name: 'gory' });
-        }
+        index === 0 ? router.push({ name: 'home' }) : router.push({ name: 'category' })
     };
-    const goBack = () => alert('Назад!');
+
+    const goBack = (index) => {
+        router.push('/')
+        index = 0
+        setActiveIcon(index)
+    }
 
 </script>
 
 <template>
     <div class="menu">
-        <div class="logo">
+        <div>
             <img src="/vue.svg" alt="Логотип">
         </div>
-        <!-- <nav class="navigate">
-            <div class="navItem">
-                123
-            </div>
-        </nav> -->
         <div class="divider"></div>
-
-        <div
+        <nav
             v-for="(item, index) in sidebarItems"
             :key="index"
-            class="menu-item"
+            class="menu-navigate"
             :class="{ 'active': activeIcon === index }"
-            @click="handleSetActive(index)"
-            >
+            @click="handleSetActive(index)">
             <img :src="item.src" :alt="item.alt" class="icon"/>
-        </div>
-
+        </nav>
         <div class="divider"></div>
-
-    <div class="menu-item back-button" @click="goBack">
-      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-      </svg>
-    </div>
+        <div class="menu-navigate back-button" @click="goBack">
+            <img src="/back.svg" alt="Логотип">
+        </div>
     </div>
 </template>
 
 <style scoped>
     .menu {
-        width: 60px;
-        background-color: #14e293;
-        border-right: 1px solid #e0e0e0;
         display: flex;
         flex-direction: column;
         align-items: center;
         padding: 20px 0;
         gap: 20px;
-        height: 100vh;
+        width: 80px;
+        background-color: #ffffff;
+        border-right: 2px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        flex-shrink: 0;
     }
 
-    .menu-item {
+    .menu-navigate {
         width: 40px;
         height: 40px;
         display: flex;
@@ -88,31 +70,26 @@
         color: #666;
     }
 
-    .menu-item:hover {
+    .menu-navigate:hover {
         background-color: #f5f5f5;
     }
 
-    .menu-item.active {
-        background-color: #000;
-        color: white;
+    .menu-navigate.active {
+        background-color: #a1a0a0;
     }
 
     .icon {
-        width: 24px;
-        height: 24px;
+        width: 30px;
+        height: 30px;
     }
 
     .divider {
         width: 35px;
         height: 1px;
-        background-color: #ddd;
+        background-color: #eee;
     }
 
     .back-button {
-        color: #666;
-    }
-
-    .back-button:hover {
-        background-color: #f5f5f5;
+        background-color: #000;
     }
 </style>

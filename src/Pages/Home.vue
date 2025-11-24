@@ -3,13 +3,17 @@
     import { Recipes } from '@/services'
     import Layout from '@/layouts/Layout.vue'
     import Button from '@/components/Button.vue'
+    import Loader from '@/components/Loader.vue'
 
     const recipes = ref([])
+    const isLoading = ref(false)
 
     const fetch = async () => {
         try {
+            isLoading.value = true
             const data = await Recipes.getData()
             recipes.value = data.meals || []
+            isLoading.value = false
         } catch (error) {
             console.log('Данные не пришли', error)
             recipes.value = []
@@ -19,6 +23,7 @@
     const getPath = (id) => {
         return `/recipe/${id}`
     }
+
     onMounted(fetch)
 </script>
 
@@ -31,7 +36,8 @@
             </RouterLink>
         </template>
         <template #recipes>
-            <div class="table-container">
+            <Loader v-if="isLoading"/>
+            <div v-else class="table-container">
                 <table v-if="recipes.length > 0" class="recipes-table">
                     <thead>
                         <tr>
@@ -67,41 +73,17 @@
 </template>
 
 <style scoped>
-.image {
-    
-    width: 70px;
-    height: 70px;
-} 
+    .image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        transition: transform 0.2s ease;
+    }
 
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.recipes-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 16px;
-  font-size: 1rem;
-}
-
-.recipes-table th,
-.recipes-table td {
-  border: 1px solid #ddd;
-  padding: 12px;
-  text-align: left;
-}
-
-.recipes-table th {
-  background-color: #f8f9fa;
-  font-weight: 600;
-}
-
-.recipes-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.recipes-table tr:hover {
-  background-color: #f1f1f1;
-}
+    .image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
 </style>

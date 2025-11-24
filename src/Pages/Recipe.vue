@@ -11,7 +11,7 @@
     const recipeId = route?.params.id
     const recipe = ref(Recipes.getEmpryRecipe())
     const recipeUpdated = ref(Recipes.getEmpryRecipe())
-    const createRecipe = ref(true)
+    const createdRecipe = ref(true)
     const recipeIngredients = ref([General.getEmpryIngredient()])
     const areas = computed(() => Store.areas)
     const categories = computed(() => Store.categories)
@@ -21,7 +21,7 @@
             const data = await Recipes.getId(recipeId)
             recipe.value = data.meals[0]
             recipeUpdated.value = structuredClone(data.meals[0])
-            createRecipe.value = false
+            createdRecipe.value = false
             // recipe.value = data.meals || []
         } catch (error) {
             console.log('Данные не пришли', error)
@@ -29,7 +29,7 @@
         }
     }
 
-    const ingredients = () => {
+    const baseIngredients = () => {
         const allIngredients = []
         for (let i = 1; i <= 20; i++ ) {
             if(recipe.value[`strIngredient${i}`]) {
@@ -40,23 +40,62 @@
                 }
                 allIngredients.push(dient)
             }
-
         }
         recipeIngredients.value = allIngredients
     }
 
-    const addIngredient = () => {
-        recipeIngredients.value.push(General.getEmpryIngredient())
+    const newIngredients = (recipe) => {
+        for (let i=0; i <= 20; i++) {
+            const ingredient = recipeIngredients.value[i-1]
+
+            if (ingredient?.title && ingredient?.measure) {
+                recipe[`strIngredient${i}`] = ingredient.title
+                recipe[`strMeasure${i}`] = ingredient.measure
+            } else {
+                recipe[`strIngredient${i}`] = ""
+                recipe[`strMeasure${i}`] = ""
+            }
+        }
     }
 
-    const removeIngredient = (index) => {
-        recipeIngredients.value.splice(index, 1)
+    const addIngredient = () => recipeIngredients.value.push(General.getEmpryIngredient())
+
+    const removeIngredient = (index) => recipeIngredients.value.splice(index, 1)
+
+    const createUpdate = () => createdRecipe.value ? createRecipe() : updateRecipe()
+
+    const createRecipe = async () => {
+        try {
+            const params = { ...recipeUpdated.value }
+            newIngredients(params)
+            await Recipes.updateRecipe()
+            setTimeout(() => {
+                alert(`Рецепт ${params.strMeal} создан`)
+            }, 500)
+            console.log(params)
+        } catch(error) {
+            console.log(error)
+        }
+    }
+
+    const updateRecipe = async () => {
+        try {
+            const params = { ...recipeUpdated.value }
+            newIngredients(params)
+            await Recipes.updateRecipe()
+            setTimeout(() => {
+                console.log(`Реепт ${params.strMeal} обновлен`)
+            }, 500)
+            console.log(params)
+        } catch(error) {
+            console.log(error)
+        }
     }
 
     onMounted(async () => {
         if(parseInt(recipeId)) {
             await fetchId()
-            ingredients()
+            baseIngredients()
         }
         console.log('Areas:', Store.areas)
     })
@@ -66,90 +105,210 @@
     <Layout>
         <template #title>{{ nameRecipe ? 'Новый рецепт': recipeUpdated.strMeal }}</template>
         <template #controls>
-            <Button text="Сохранить"/>
+            <Button text="Сохранить" @click="createUpdate"/>
         </template>
         <template #recipes>
-            <div class="container">
-                <div class="ro">
-                    <div class="col">
-                        <div class="label">Title</div>
-                        <input v-model="recipeUpdated.strMeal">
+            <div class="wrapper">
+                <div class="row">
+                    <div class="field-group">
+                        <label class="label">Title</label>
+                        <input v-model="recipeUpdated.strMeal" class="input">
                     </div>
-                    <div class="col">
-                        <div class="label">Area</div>
-                        <select v-model="recipeUpdated.strArea">
+                    <div class="field-group">
+                        <label class="label">Area</label>
+                        <select v-model="recipeUpdated.strArea" class="input">
                             <option 
                             v-for="item in areas"
                             :key="item.strArea"
-                            :value="item.strArea"
-                            >
-                            {{ item.strArea }}
+                            :value="item.strArea">
+                                {{ item.strArea }}
                             </option>
-                        </select>
+                            </select>
                     </div>
                 </div>
-                <div class="ro">
-                    <div class="col">
-                        <div class="label">Category</div>
-                        <select v-model="recipeUpdated.strCategory">
+                <div class="row">
+                    <div class="field-group">
+                        <label class="label">Category</label>
+                        <select v-model="recipeUpdated.strCategory" class="input">
                             <option 
                             v-for="item in categories"
                             :key="item.strCategory"
                             :value="item.strCategory">
-                            {{ item.strCategory }}
+                                {{ item.strCategory }}
                             </option>
                         </select>
                     </div>
                 </div>
-                {{ recipeIngredients }}
-                <div class="ingredients">
-                    <div class="subtitle">
-                        Ingredients
-                    </div>
-                    <div class="ro"
-                    v-for="(ingredient, index) in recipeIngredients"
-                    :key="`${ingredient.id}-${index}`">
-                        <div class="col">
-                            {{ index + 1 }}
+                <div class="section">
+                    <h2 class="section-title">Ingredients</h2>
+                        <div class="ingredients-list">
+                            <div v-for="(ingredient, index) in recipeIngredients"
+                            :key="`${ingredient.id}-${index}`" class="ingredient-row">
+                                    <div class="ingredient-number">
+                                        {{ index + 1 }}
+                                    </div>
+                                <div class="field-group small">
+                                    <label class="label">Measure</label>
+                                    <input
+                                    v-model="recipeIngredients[index].measure"
+                                    class="input"
+                                    placeholder="200g"/>
+                                </div>
+                                <div class="field-group">
+                                    <label class="label">Title</label>
+                                    <input
+                                    v-model="recipeIngredients[index].title"
+                                    class="input"
+                                    placeholder="Tomato"
+                                    />
+                                </div>
+                                <div class="delete-ingredient">
+                                    <Button
+                                    text="Удалить"
+                                    @click="() => removeIngredient(index)"/>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col">
-                        <div class="label">Measure</div>
-                            <input v-model="recipeIngredients[index].measure">
+                        <div class="add-ingredient">
+                            <Button text="Добавить ингредиент" @click="addIngredient"/>
                         </div>
-                        <div class="label">Title</div>
-                            <input v-model="recipeIngredients[index].title">
                     </div>
-                    <div class="col">
-                        <Button text="Удалить" @click="() => removeIngredient(index)"/>
-                    </div>
-                    <div>
-                        <Button text="Добавить ингридиент" @click="addIngredient"/>
-                    </div>
-                </div>
-                <div class="ro">
-                    <div class="col">
-                        <div class="label">Последовательность</div>
+                <div class="row">
+                    <div class="field-group full">
+                        <label class="label">Последовательность</label>
                         <textarea
                         v-model="recipeUpdated.strInstructions"
-                        class="instructions-textarea"
-                        rows="6">
-                        </textarea>
+                        class="textarea"rows="6"></textarea>
                     </div>
                 </div>
             </div>
-            <!-- {{ recipeUpdated }} -->
         </template>
     </Layout>
 </template>
+
 <style scoped>
-.instructions-textarea {
-  width: 100%;
-  padding: 8px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  /* resize: vertical; */
-  min-height: 60px;
-  max-height: 200px;
-}
+    .wrapper {
+        padding: 20px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .label {
+        display: block;
+        margin: 10px 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .input,
+    .textarea {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input:focus,
+    .textarea:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+
+    .textarea {
+        min-height: 160px;
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+    .row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .field-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .field-group.small {
+        min-width: 120px;
+    }
+
+    .field-group.full {
+        flex: 100%;
+    }
+
+    .section {
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #1e293b;
+    }
+
+    .ingredients-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+
+    .ingredient-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 2fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    }
+
+    .ingredient-number {
+        font-weight: 600;
+        color: #64748b;
+        text-align: center;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .field-group.small {
+        min-width: auto;
+    }
+
+    .field-group.small .input {
+        width: 100%;
+    }
+
+    .ingredient-row .field-group {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .ingredient-row .field-group.small {
+        min-width: 100px;
+    }
+
+    .delete-ingredient {
+        margin-top: 30px;
+    }
+
+    .add-ingredient {
+        margin-top: 15px;
+    }
 </style>

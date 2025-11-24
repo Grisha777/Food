@@ -9,19 +9,21 @@ export const useRootStore = defineStore('root', () => {
 
     async function getAreas() {
         const data = await General.getAreas()
-
         areas.value = data
     }
 
     async function getCategories() {
-        const data = await General.getCategories();
-
-        categories.value = data;
+        try {
+            const data = await General.getCategories();
+            categories.value = data;
+            console.log('Данные в store:', data);
+        } catch (error) {
+            console.error('Ошибка загрузки категорий:', error);
+        }
     }
 
     async function getIngredients() {
         const data = await General.getIngredients();
-
         ingredients.value = data;
     }
 
